@@ -654,7 +654,7 @@ function audioInit() {
   if (Snd.ctx) { Snd.ctx.resume(); return; }
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
   const ctx = Snd.ctx = new AC();
-  Snd.master = ctx.createGain(); Snd.master.gain.value = .9; Snd.master.connect(ctx.destination);
+  Snd.master = ctx.createGain(); Snd.master.gain.value = Snd.musicOn ? .9 : 0; Snd.master.connect(ctx.destination);
   Snd.musicLP = ctx.createBiquadFilter(); Snd.musicLP.type = "lowpass"; Snd.musicLP.frequency.value = 2400;
   Snd.music = ctx.createGain(); Snd.music.gain.value = musicLevel(); Snd.music.connect(Snd.musicLP); Snd.musicLP.connect(Snd.master);
   Snd.sfx = ctx.createGain(); Snd.sfx.gain.value = .75; Snd.sfx.connect(Snd.master);
@@ -756,14 +756,16 @@ const sfx = {
     const g = c.createGain(); g.gain.setValueAtTime(.0001, t + .5); g.gain.linearRampToValueAtTime(.25, t + .6); g.gain.exponentialRampToValueAtTime(.0001, t + 2);
     src.connect(hp); hp.connect(g); g.connect(Snd.sfx); src.start(t + .5); src.stop(t + 2.1); },
 };
-const NOTE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>';
+const NOTE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const NOTE_OFF_SVG = NOTE_SVG.replace("</svg>", '<path d="M3 3l18 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>');
 function setMusic(on) {
   Snd.musicOn = on; try { localStorage.setItem("ipadmama-music", on ? "on" : "off"); } catch (e) {}
-  if (Snd.ctx) { Snd.music.gain.setTargetAtTime(musicLevel(), Snd.ctx.currentTime, .15); Snd.drama.gain.setTargetAtTime(dramaLevel(), Snd.ctx.currentTime, .15); }
+  // the switch mutes everything: music, sound effects and voices
+  if (!on) try { speechSynthesis.cancel(); } catch (e) {}
+  if (Snd.ctx) { Snd.master.gain.setTargetAtTime(on ? .9 : 0, Snd.ctx.currentTime, .05); Snd.music.gain.setTargetAtTime(musicLevel(), Snd.ctx.currentTime, .15); Snd.drama.gain.setTargetAtTime(dramaLevel(), Snd.ctx.currentTime, .15); }
   const btns = [$("musicStart"), $("musicMenu")];
-  for (const b of btns) b.innerHTML = (on ? NOTE_SVG : NOTE_OFF_SVG) + (on ? "音乐开" : "音乐关");
-  for (const b of btns) { b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "关音乐" : "开音乐"); }
+  for (const b of btns) b.innerHTML = (on ? NOTE_SVG : NOTE_OFF_SVG) + (on ? "声音开" : "声音关");
+  for (const b of btns) { b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "关声音" : "开声音"); }
 }
 for (const id of ["musicStart", "musicMenu"]) $(id).addEventListener("click", () => { audioInit(); setMusic(!Snd.musicOn); });
 
@@ -789,7 +791,7 @@ function pickVoice(who) {
 // iOS only lets speech start from a tap, so the start button unlocks it with a silent line
 function unlockVoice() { if (!Voice.ok) return; try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
 function speak(text, who, angry = false, volume = 1) {
-  if (!Voice.ok) return false;
+  if (!Voice.ok || !Snd.musicOn) return false;
   try {
     // each new line cuts off the one before, so the voice always matches the bubble on screen
     if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
