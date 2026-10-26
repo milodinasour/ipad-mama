@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2a1d24">
-<title>iPad Mama</title>
+<title>iPad 妈妈</title>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@500;700;900&display=swap">
 <style>
 /* Layout: one phone-shaped stage; 3D living room fills it, HUD floats top, call button anchors bottom. Single evening-lamp look in every theme. */
 :root {
@@ -24,8 +24,8 @@
   --win: #4f9a62;
   --lose: #d0574d;
   --rose: #e9a0a0;
-  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
-  --body: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --display: "Baloo 2", "ZCOOL KuaiLe", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --body: "Nunito", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   color-scheme: dark;
 }
 html, body { height: 100%; }
@@ -117,20 +117,6 @@ body {
 .stars .off { fill: rgba(62,42,44,.12); stroke: rgba(62,42,44,.2); }
 #app.climax .stars .on { fill: #ff7a59; stroke: #b53a2a; }
 
-/* the "tap Mama" call target, floating on Mama */
-.tapmama {
-  position: absolute; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%;
-  border: 3px solid #fff; background: var(--tangerine); color: #fff; cursor: pointer; pointer-events: auto;
-  display: grid; place-items: center; touch-action: manipulation; padding: 0;
-  box-shadow: 0 5px 0 var(--tangerine-deep), 0 10px 22px rgba(0,0,0,.3);
-  transition: opacity .25s, transform .25s; animation: tapBob 1.6s ease-in-out infinite;
-}
-.tapmama svg { width: 28px; height: 28px; }
-.tapmama::before, .tapmama::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 3px solid var(--tangerine); animation: ripple 1.6s ease-out infinite; }
-.tapmama::after { animation-delay: .8s; }
-.tapmama.off { opacity: 0; transform: scale(.5); pointer-events: none; }
-@keyframes tapBob { 50% { translate: 0 -5px; } }
-@keyframes ripple { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
 .btn.ghost.musicbtn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .musicbtn svg { width: 20px; height: 20px; }
 .btn.ghost.musicbtn[aria-pressed="false"] { opacity: .55; }
@@ -245,19 +231,17 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
 @keyframes quake { 0%, 100% { translate: 0 0; } 10% { translate: -9px 4px; } 25% { translate: 8px -5px; } 40% { translate: -7px -3px; } 55% { translate: 6px 5px; } 70% { translate: -4px 2px; } 85% { translate: 3px -2px; } }
 #app.playing .hud, #app.playing .dock { opacity: 1; }
 #app:not(.playing) .hud, #app:not(.playing) .dock { opacity: 0; pointer-events: none; }
-#app:not(.playing) .tapmama { opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
 </style>
 
 <div id="app">
-  <canvas id="scene" aria-label="Living room where Mama watches her iPad"></canvas>
+  <canvas id="scene" aria-label="妈妈在客厅看 iPad"></canvas>
   <div id="vignette"></div>
   <div id="overlay3d">
     <div class="bubble" id="mamaBubble"></div>
     <div class="bubble kid" id="kidBubble"></div>
-    <button class="tapmama off" id="tapMama" aria-label="Call Mama"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></button>
   </div>
   <div id="fx"><div class="fxicon"></div></div>
 
@@ -265,39 +249,39 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
     <div class="scen" id="scenChip">
       <span class="ic" id="scenIcon"></span>
       <span class="name" id="scenName">iPad</span>
-      <span class="stars" id="scenStars" aria-label="Difficulty"></span>
+      <span class="stars" id="scenStars" aria-label="难度"></span>
       <span class="odds"><span class="w" id="scenWin">+20</span><span class="l" id="scenLose">−10</span></span>
     </div>
-    <div class="mood" title="Mama's patience">
+    <div class="mood" title="妈妈的耐心">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 .5 9z"/></svg>
       <div class="moodbar"><i id="moodFill"></i></div>
     </div>
   </div>
 
   <div class="dock">
-    <div class="hint" id="hint">Tap Mama to call her · Double tap to jump</div>
+    <div class="hint" id="hint">点妈妈叫她 · 双击跳跳</div>
     <div class="hud-row tray">
-      <div class="stat score"><small>Score</small><b id="scoreVal">0</b></div>
-      <div class="stat"><small>Calls</small><b id="callsLeft">30</b></div>
-      <div class="stat"><small>Jackpot</small><div class="pips" id="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div></div>
-      <button class="iconbtn musicbtn" id="musicHud" aria-label="Music" aria-pressed="true"></button>
+      <div class="stat score"><small>分数</small><b id="scoreVal">0</b></div>
+      <div class="stat"><small>次数</small><b id="callsLeft">30</b></div>
+      <div class="stat"><small>大奖</small><div class="pips" id="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div></div>
+      <button class="iconbtn musicbtn" id="musicHud" aria-label="音乐" aria-pressed="true"></button>
     </div>
   </div>
 
-  <div id="jackpot"><div class="card"><b>JACKPOT</b><span id="jpAmt">+300</span></div></div>
+  <div id="jackpot"><div class="card"><b>大奖！</b><span id="jpAmt">+300</span></div></div>
 
   <section class="screen" id="startScreen">
     <div class="panel">
-      <div class="logo"><h1>iPad Mama</h1><p>She's deep in her drama. Call her anyway.</p></div>
+      <div class="logo"><h1>iPad 妈妈</h1><p>妈妈在追剧，还是叫叫她吧！</p></div>
       <div class="legend" id="legend"></div>
-      <div class="jprule"><span class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></span> 4 replies in a row = Jackpot</div>
-      <label class="f" for="nameInput">Your name
-        <input id="nameInput" maxlength="14" autocomplete="nickname" placeholder="e.g. Little Mei">
+      <div class="jprule"><span class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></span> 连续回应 4 次 = 大奖</div>
+      <label class="f" for="nameInput">你的名字
+        <input id="nameInput" maxlength="14" autocomplete="nickname" placeholder="例如：小美">
       </label>
-      <button class="btn primary" id="startBtn">Start · 30 calls</button>
+      <button class="btn primary" id="startBtn">开始 · 30 次机会</button>
       <div class="row2">
         <button class="btn ghost musicbtn" id="musicStart" aria-pressed="true"></button>
-        <button class="btn ghost" id="boardBtn">Leaderboard</button>
+        <button class="btn ghost" id="boardBtn">排行榜</button>
       </div>
     </div>
   </section>
@@ -305,20 +289,20 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
   <section class="screen" id="endScreen" hidden>
     <div class="panel">
       <div class="final">
-        <small>Final score</small>
+        <small>最终分数</small>
         <b id="finalScore">0</b>
         <span class="jp" id="finalJp"></span>
         <span class="note" id="saveNote"></span>
       </div>
-      <div class="board"><h2>Top players <span class="mode"></span></h2><ol class="list"></ol></div>
-      <button class="btn primary" id="againBtn">Play again</button>
+      <div class="board"><h2>排行榜 <span class="mode"></span></h2><ol class="list"></ol></div>
+      <button class="btn primary" id="againBtn">再玩一次</button>
     </div>
   </section>
 
   <section class="screen" id="boardScreen" hidden>
     <div class="panel">
-      <div class="board"><h2>Top players <span class="mode"></span></h2><ol class="list"></ol></div>
-      <button class="btn primary" id="closeBoard">Back</button>
+      <div class="board"><h2>排行榜 <span class="mode"></span></h2><ol class="list"></ol></div>
+      <button class="btn primary" id="closeBoard">返回</button>
     </div>
   </section>
 </div>
@@ -332,10 +316,10 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
 const TOTAL_CALLS = 30, JACKPOT = 300, STREAK_FOR_JP = 4;
 // stars = difficulty shown to the player; reply = seconds before Mama reacts; dur = how long the moment lasts
 const SCEN = {
-  boring: { name: "Boring…",      p: .80, win: 10,  lose: 5,  weight: 25, stars: 1, reply: .45, dur: [3.5, 5.5] },
-  ipad:   { name: "iPad",         p: .60, win: 20,  lose: 10, weight: 35, stars: 2, reply: .65, dur: [4, 6] },
-  duo:    { name: "iPad + Phone", p: .40, win: 45,  lose: 20, weight: 25, stars: 3, reply: .85, dur: [3.5, 5] },
-  climax: { name: "Climax!",      p: .25, win: 100, lose: 30, weight: 15, stars: 5, reply: 1.15, dur: [3, 4.5] },
+  boring: { name: "剧情好闷…",   p: .80, win: 10,  lose: 5,  weight: 25, stars: 1, reply: .45, dur: [3.5, 5.5] },
+  ipad:   { name: "看 iPad",     p: .60, win: 20,  lose: 10, weight: 35, stars: 2, reply: .65, dur: [4, 6] },
+  duo:    { name: "iPad + 手机", p: .40, win: 45,  lose: 20, weight: 25, stars: 3, reply: .85, dur: [3.5, 5] },
+  climax: { name: "剧情高潮！", p: .25, win: 100, lose: 30, weight: 15, stars: 5, reply: 1.15, dur: [3, 4.5] },
 };
 const STAR = '<svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linejoin="round"><path class="CLS" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>';
 const starsHtml = n => Array.from({ length: 5 }, (_, i) => STAR.replace("CLS", i < n ? "on" : "off")).join("");
@@ -346,10 +330,11 @@ const ICONS = {
   boring: '<svg viewBox="0 0 24 24" fill="currentColor"><text x="3" y="20" font-family="Baloo 2, sans-serif" font-weight="800" font-size="13">z</text><text x="11" y="13" font-family="Baloo 2, sans-serif" font-weight="800" font-size="10">z</text><text x="17" y="7" font-family="Baloo 2, sans-serif" font-weight="800" font-size="7">z</text></svg>',
 };
 const LINES = {
-  kid: ["Mummy!", "Mummy~", "Mummyyy!", "MUMMY!!"],
-  lookResp: ["Yes, dear?", "What is it?", "Hmm? Tell me.", "Yes sayang?"],
-  noLookResp: ["Yes?", "What?", "Say again?", "Hmm?", "Wait ah…", "Ok ok…", "Later ya…"],
-  angry: ["Stop calling!", "Aiyo! Not now!", "Mama is BUSY!", "Don't disturb!"],
+  kid: ["妈妈？", "妈妈～", "妈妈，妈妈！", "妈妈！！"],
+  kidSpoken: ["妈妈？", "妈妈！", "妈妈，妈妈！", "妈妈！妈妈！"], // what the voice says, without symbols speech reads oddly
+  lookResp: ["怎么啦，宝贝？", "什么事呀？", "嗯？你说。", "乖，叫妈妈干嘛？"],
+  noLookResp: ["嗯？", "什么？", "再说一次？", "等一下哦…", "好啦好啦…", "待会儿啊…"],
+  angry: ["别吵了！", "哎呀！不要现在！", "妈妈在忙！", "不要打扰我！"],
 };
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -360,7 +345,7 @@ const fmt = n => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n);
 const $ = id => document.getElementById(id);
 const app = $("app"), canvas = $("scene");
 const ui = {
-  score: $("scoreVal"), pips: [...$("pips").children], calls: $("callsLeft"), tap: $("tapMama"),
+  score: $("scoreVal"), pips: [...$("pips").children], calls: $("callsLeft"),
   chip: $("scenChip"), sIcon: $("scenIcon"), sName: $("scenName"), sWin: $("scenWin"), sLose: $("scenLose"), sStars: $("scenStars"),
   mood: $("moodFill"), hint: $("hint"), mamaB: $("mamaBubble"), kidB: $("kidBubble"), overlay: $("overlay3d"),
 };
@@ -562,8 +547,7 @@ for (const s of [-1, 1]) {
 }
 const mouth = mesh(new THREE.SphereGeometry(.03, 10, 8), M("#a8434a"), 0, .14, .255, headPivot); mouth.scale.set(1.4, .55, .5);
 const mamaAnchor = new THREE.Object3D(); mamaAnchor.position.set(0, .72, 0); headPivot.add(mamaAnchor);
-// where the "tap Mama" button floats (her lap), and an invisible box that makes her whole body tappable
-const tapAnchor = new THREE.Object3D(); tapAnchor.position.set(0, seatY + .12, .55); mama.add(tapAnchor);
+// invisible box that makes Mama's whole body tappable
 const mamaHit = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.7, 1.1), new THREE.MeshBasicMaterial({ visible: false }));
 mamaHit.position.set(0, .85, .2); mama.add(mamaHit);
 
@@ -716,8 +700,8 @@ function setMusic(on) {
   if (Snd.ctx) Snd.music.gain.setTargetAtTime(musicLevel(), Snd.ctx.currentTime, .15);
   const hud = $("musicHud"), start = $("musicStart");
   hud.innerHTML = on ? NOTE_SVG : NOTE_OFF_SVG;
-  start.innerHTML = (on ? NOTE_SVG : NOTE_OFF_SVG) + (on ? "Music on" : "Music off");
-  for (const b of [hud, start]) { b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "Turn music off" : "Turn music on"); }
+  start.innerHTML = (on ? NOTE_SVG : NOTE_OFF_SVG) + (on ? "音乐开" : "音乐关");
+  for (const b of [hud, start]) { b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "关音乐" : "开音乐"); }
 }
 for (const id of ["musicHud", "musicStart"]) $(id).addEventListener("click", () => { audioInit(); setMusic(!Snd.musicOn); });
 
@@ -725,19 +709,21 @@ for (const id of ["musicHud", "musicStart"]) $(id).addEventListener("click", () 
 const Voice = { ok: "speechSynthesis" in window, list: [] };
 function loadVoices() { try { Voice.list = speechSynthesis.getVoices(); } catch (e) {} }
 if (Voice.ok) { loadVoices(); try { speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch (e) {} }
+// a Mandarin voice, preferring mainland female voices (Tingting on Apple, Xiaoxiao on Windows, Google 普通话)
 function pickVoice() {
-  const en = Voice.list.filter(v => /^en/i.test(v.lang));
-  for (const re of [/samantha/i, /karen/i, /tessa/i, /moira/i, /zira/i, /aria/i, /jenny/i, /female/i, /google uk english/i, /google us english/i]) {
-    const v = en.find(x => re.test(x.name)); if (v) return v;
+  const zh = Voice.list.filter(v => /^zh/i.test(v.lang) || /cmn/i.test(v.lang));
+  const cn = zh.filter(v => /CN|Hans|cmn/i.test(v.lang));
+  for (const re of [/tingting|婷婷/i, /xiaoxiao|晓晓/i, /huihui|慧慧/i, /普通话|mandarin/i, /female|女/i, /sandy|shelley|flo\b/i]) {
+    const v = cn.find(x => re.test(x.name)) || zh.find(x => re.test(x.name)); if (v) return v;
   }
-  return en[0] || null;
+  return cn[0] || zh[0] || null;
 }
 // who: "kid" (high, quick) or "mama"; returns false when the browser cannot speak
 function speak(text, who, angry = false) {
   if (!Voice.ok) return false;
   try {
-    const u = new SpeechSynthesisUtterance(text.replace(/…/g, ""));
-    const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
+    const u = new SpeechSynthesisUtterance(text.replace(/[…～~]/g, ""));
+    const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "zh-CN";
     if (who === "kid") { speechSynthesis.cancel(); u.pitch = 2; u.rate = 1.15; }
     else { u.pitch = angry ? .75 : 1.1; u.rate = angry ? 1.25 : .95; }
     u.volume = 1; speechSynthesis.speak(u); return true;
@@ -770,9 +756,6 @@ function nextScen() {
 }
 setScen("ipad");
 setMusic(Snd.musicOn);
-
-// show the "tap Mama" target only when a call can be made
-function setReady(on) { ui.tap.classList.toggle("off", !on); }
 
 function renderHud() {
   ui.score.textContent = state.score;
@@ -834,14 +817,14 @@ function resolveCall(s) {
 function callMama() {
   if (!state.playing || state.busy || state.calls <= 0) return;
   audioInit();
-  state.busy = true; setReady(false);
+  state.busy = true;
   state.calls--; ui.calls.textContent = state.calls;
   const k = state.scen, s = SCEN[k];
   state.annoy = clamp(state.annoy + 22 + (k === "climax" ? 14 : k === "duo" ? 6 : 0), 0, 100);
   const lvl = state.annoy > 75 ? 3 : state.annoy > 55 ? 2 : state.annoy > 35 ? 1 : 0;
   const line = LINES.kid[lvl];
   say(ui.kidB, line, "", 1100); state.kidHop = 1;
-  if (!speak(line, "kid")) sfx.call(lvl);
+  if (!speak(LINES.kidSpoken[lvl], "kid")) sfx.call(lvl);
   ui.hint.style.opacity = 0;
   const outcome = resolveCall(s);
   setTimeout(() => react(outcome, s), s.reply * 1000);
@@ -850,7 +833,7 @@ function react(o, s) {
   let pts = 0, good = false, line;
   if (o === "lookResp") { pts = s.win; good = true; look(1.8); line = pick(LINES.lookResp); say(ui.mamaB, line, "", 2000); speak(line, "mama"); sfx.good(); screenFx("joy"); }
   else if (o === "noLookResp") { pts = Math.round(s.win * .6); good = true; line = pick(LINES.noLookResp); say(ui.mamaB, line, "", 1900); speak(line, "mama"); sfx.soft(); screenFx("happy"); }
-  else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1500); speak("Hmm.", "mama"); sfx.meh(); screenFx("sad"); }
+  else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1500); speak("嗯。", "mama"); sfx.meh(); screenFx("sad"); }
   else if (o === "noLookNo") { pts = -s.lose; say(ui.mamaB, "…", "faint", 1400); sfx.ignore(); screenFx("sad"); }
   else { pts = -s.lose * 2; look(2.2); state.angryT = 2.2; line = pick(LINES.angry); say(ui.mamaB, line, "angry", 2200); speak(line, "mama", true); sfx.angry(); screenFx("angry"); state.annoy = 100; }
   state.score += pts; floater(fmt(pts), good);
@@ -864,7 +847,7 @@ function react(o, s) {
     if (jp) jackpot();
     setTimeout(() => {
       state.busy = false;
-      if (state.calls <= 0) endGame(); else setReady(true);
+      if (state.calls <= 0) endGame();
     }, jp ? 2200 : 300);
   }, 450);
 }
@@ -884,7 +867,6 @@ function jackpot() {
   for (let i = 0; i < 16; i++) emit(T.star, kp, { size: .2, life: 1.6, spread: .3, vel: [rand(-.6, .6), rand(.6, 1.3), rand(-.3, .3)] });
 }
 function look(t) { state.look = 1; state.lookT = t; }
-ui.tap.addEventListener("click", callMama);
 
 /* ---------------- walking ---------------- */
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -932,6 +914,15 @@ function walkTo(p) {
 function toggleLamp() {
   state.lampOn = !state.lampOn; sfx.click(state.lampOn);
 }
+// on desktop, show a hand cursor over the things you can tap
+canvas.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;
+  const r = canvas.getBoundingClientRect();
+  ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hot = ray.intersectObject(lampHit).length || (state.playing && ray.intersectObject(mamaHit).length);
+  canvas.style.cursor = hot ? "pointer" : "";
+});
 let lastTap = { t: 0, x: 0, y: 0 };
 canvas.addEventListener("pointerdown", e => {
   audioInit();
@@ -1081,7 +1072,6 @@ function loop() {
   camera.lookAt(camTarget);
 
   // html overlay positions
-  { const [tx, ty] = toScreen(tapAnchor); ui.tap.style.left = tx + "px"; ui.tap.style.top = ty + "px"; }
   const minY = hudBottom();
   for (const [el, anchor] of [[ui.mamaB, mamaAnchor], [ui.kidB, kidAnchor]]) {
     const [x, y] = toScreen(anchor), half = el.offsetWidth / 2 + 8;
@@ -1106,7 +1096,7 @@ requestAnimationFrame(loop);
 const SUPABASE_URL = "https://dpngdlumoyjyldjocmbi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_tSDVs9UZCkhWBP6jwAtmtQ_OSXy419o";
 const TABLE = "ipadmama_scores";
-const LB = { rows: null, last: null, mode: "This device" };
+const LB = { rows: null, last: null, mode: "本机" };
 function localRows() { try { return JSON.parse(localStorage.getItem("ipadmama-board") || "[]"); } catch (e) { return []; } }
 function saveLocal(row) {
   const rows = localRows(); rows.push(row); rows.sort((a, b) => b.score - a.score);
@@ -1117,16 +1107,16 @@ function renderBoards() {
   const rows = (LB.rows || localRows()).filter(validRow).slice(0, 20), mine = LB.last;
   let marked = false;
   document.querySelectorAll(".board").forEach(b => {
-    b.querySelector(".mode").textContent = LB.rows ? "Global" : LB.mode;
+    b.querySelector(".mode").textContent = LB.rows ? "全球" : LB.mode;
     const ol = b.querySelector(".list"); ol.textContent = ""; marked = false;
-    if (!rows.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "No scores yet. Be the first to call Mama!"; ol.appendChild(li); return; }
+    if (!rows.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "还没有分数，快来第一个叫妈妈！"; ol.appendChild(li); return; }
     rows.forEach((r, i) => {
       const li = document.createElement("li");
       if (!marked && mine && r.name === mine.name && r.score === mine.score) { li.classList.add("me"); marked = true; }
       const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = i + 1;
-      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = String(r.name).slice(0, 14) || "Player";
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = String(r.name).slice(0, 14) || "玩家";
       const jb = document.createElement("span"); const jn = Math.max(0, Math.floor(Number(r.jackpots) || 0));
-      if (jn) { jb.className = "jb"; jb.textContent = "★ Jackpot" + (jn > 1 ? " ×" + jn : ""); }
+      if (jn) { jb.className = "jb"; jb.textContent = "★ 大奖" + (jn > 1 ? " ×" + jn : ""); }
       const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = Math.round(r.score);
       li.append(rk, nm, jb, sc); ol.appendChild(li);
     });
@@ -1150,12 +1140,12 @@ async function submitScore() {
   const row = { name: state.name.slice(0, 14), score: state.score, jackpots: state.jackpots, at: Date.now() };
   saveLocal(row); LB.last = row;
   const note = $("saveNote");
-  note.textContent = "Saving to the global board…"; renderBoards();
+  note.textContent = "正在上传到全球排行榜…"; renderBoards();
   try {
     await api(TABLE, { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ name: row.name, score: row.score, jackpots: row.jackpots }) });
-    note.textContent = "Saved to the global board!";
+    note.textContent = "已上传到全球排行榜！";
     await loadBoard();
-  } catch (e) { note.textContent = "Couldn't reach the global board. Saved on this device."; renderBoards(); }
+  } catch (e) { note.textContent = "连不上全球排行榜，分数已存在本机。"; renderBoards(); }
 }
 
 /* ---------------- screens ---------------- */
@@ -1167,16 +1157,15 @@ function startGame() {
   try { localStorage.setItem("ipadmama-name", n); } catch (e) {}
   audioInit();
   Object.assign(state, { playing: true, busy: false, name: n, score: 0, calls: TOTAL_CALLS, streak: 0, jackpots: 0, annoy: 0 });
-  renderHud(); setReady(true); ui.hint.style.opacity = .9;
+  renderHud(); ui.hint.style.opacity = .9;
   $("startScreen").hidden = true; $("endScreen").hidden = true; $("boardScreen").hidden = true;
   app.classList.add("playing");
   setScen("ipad");
 }
 function endGame() {
-  setReady(false);
   state.playing = false; app.classList.remove("playing");
   $("finalScore").textContent = state.score;
-  $("finalJp").textContent = state.jackpots ? `★ Hit the jackpot${state.jackpots > 1 ? " ×" + state.jackpots : ""}!` : "No jackpot this time";
+  $("finalJp").textContent = state.jackpots ? `★ 中了大奖${state.jackpots > 1 ? " ×" + state.jackpots : ""}！` : "这次没有中大奖";
   $("endScreen").hidden = false;
   submitScore();
 }
