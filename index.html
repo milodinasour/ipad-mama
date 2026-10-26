@@ -786,15 +786,20 @@ function pickVoice(who) {
   return cn[0] || zh[0] || null;
 }
 // who: "kid" (high, quick) or "mama"; returns false when the browser cannot speak
-function speak(text, who, angry = false) {
+// iOS only lets speech start from a tap, so the start button unlocks it with a silent line
+function unlockVoice() { if (!Voice.ok) return; try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
+function speak(text, who, angry = false, volume = 1) {
   if (!Voice.ok) return false;
   try {
+    // each new line cuts off the one before, so the voice always matches the bubble on screen
+    if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    speechSynthesis.resume();
     const u = new SpeechSynthesisUtterance(text.replace(/[…～~]/g, ""));
     const v = pickVoice(who); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "zh-CN";
     // daughter: bright and light; Mama: lower, slower and warmer, quicker and sharper when angry
-    if (who === "kid") { speechSynthesis.cancel(); u.pitch = 1.65; u.rate = 1.05; }
+    if (who === "kid") { u.pitch = 1.65; u.rate = 1.05; }
     else { u.pitch = angry ? .8 : .85; u.rate = angry ? 1.15 : .88; }
-    u.volume = 1; speechSynthesis.speak(u); return true;
+    u.volume = volume; speechSynthesis.speak(u); return true;
   } catch (e) { return false; }
 }
 
@@ -909,7 +914,7 @@ function react(o, s) {
   if (o === "lookResp") { pts = s.win; good = true; look(1.8); line = pick(LINES.lookResp); say(ui.mamaB, line, "", 2000); speak(line, "mama"); sfx.good(); screenFx("joy"); }
   else if (o === "noLookResp") { pts = Math.round(s.win * .6); good = true; line = pick(LINES.noLookResp); say(ui.mamaB, line, "", 1900); speak(line, "mama"); sfx.soft(); screenFx("happy"); }
   else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1500); speak("嗯。", "mama"); sfx.meh(); screenFx("sad"); }
-  else if (o === "noLookNo") { pts = -s.lose; say(ui.mamaB, "…", "faint", 1400); sfx.ignore(); screenFx("sad"); }
+  else if (o === "noLookNo") { pts = -s.lose; say(ui.mamaB, "…", "faint", 1400); speak("嗯…", "mama", false, .45); sfx.ignore(); screenFx("sad"); }
   else { pts = -s.lose * 2; look(2.2); state.angryT = 2.2; line = pick(LINES.angry); say(ui.mamaB, line, "angry", 2200); speak(line, "mama", true); sfx.angry(); screenFx("angry"); state.annoy = 100; }
   state.score += pts; floater(fmt(pts), good);
   state.kidMood = good ? 1 : -1; state.kidMoodT = 1.6;
@@ -1235,6 +1240,7 @@ function startGame() {
   const n = nameInput.value.trim();
   if (!n) { nameInput.classList.remove("err"); void nameInput.offsetWidth; nameInput.classList.add("err"); nameInput.focus(); return; }
   try { localStorage.setItem("ipadmama-name", n); } catch (e) {}
+  unlockVoice();
   audioInit();
   Object.assign(state, { playing: true, busy: false, paused: false, round: state.round + 1, name: n, score: 0, calls: TOTAL_CALLS, streak: 0, jackpots: 0, annoy: 0 });
   renderHud(); ui.hint.style.opacity = .9;
