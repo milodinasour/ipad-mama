@@ -90,7 +90,6 @@ body {
 .scen .name { font: 800 17px/1 var(--display); }
 .scen .odds { font: 800 12px/1.2 var(--body); font-variant-numeric: tabular-nums; display: grid; text-align: right; }
 .scen .odds .w { color: var(--win); } .scen .odds .l { color: var(--lose); }
-.scen .pct { font: 800 20px/1 var(--display); padding-left: 10px; border-left: 2px dashed rgba(62,42,44,.2); font-variant-numeric: tabular-nums; }
 .scen.swap { animation: swap .5s; }
 @keyframes swap { 0% { transform: scale(.85) rotate(-3deg); } 60% { transform: scale(1.06); } }
 #app.climax .scen { background: #ffd9d9; }
@@ -107,17 +106,35 @@ body {
   padding: 0 max(16px, env(safe-area-inset-right, 0px)) 18px max(16px, env(safe-area-inset-left, 0px));
   pointer-events: none; transition: opacity .4s;
 }
-#callBtn {
-  pointer-events: auto; border: 0; cursor: pointer; touch-action: manipulation;
-  font: 800 24px/1 var(--display); color: #fff; letter-spacing: .01em;
-  background: var(--tangerine); border-radius: 999px; padding: 16px 34px 12px;
-  box-shadow: 0 6px 0 var(--tangerine-deep), 0 12px 24px rgba(0,0,0,.25);
-  display: flex; align-items: center; gap: 12px; transition: transform .1s, filter .2s, box-shadow .1s;
+.tray { width: 100%; }
+.tray .stat b { font-size: 24px; }
+.hint { font: 800 13px/1.2 var(--body); color: var(--biscuit); text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,.4); opacity: .9; transition: opacity .6s; }
+
+/* difficulty stars: more filled stars = harder to get a reply */
+.stars { display: inline-flex; gap: 1px; padding-left: 10px; border-left: 2px dashed rgba(62,42,44,.2); }
+.stars svg { width: 15px; height: 15px; }
+.stars .on { fill: var(--honey); stroke: #c48a1c; }
+.stars .off { fill: rgba(62,42,44,.12); stroke: rgba(62,42,44,.2); }
+#app.climax .stars .on { fill: #ff7a59; stroke: #b53a2a; }
+
+/* the "tap Mama" call target, floating on Mama */
+.tapmama {
+  position: absolute; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%;
+  border: 3px solid #fff; background: var(--tangerine); color: #fff; cursor: pointer; pointer-events: auto;
+  display: grid; place-items: center; touch-action: manipulation; padding: 0;
+  box-shadow: 0 5px 0 var(--tangerine-deep), 0 10px 22px rgba(0,0,0,.3);
+  transition: opacity .25s, transform .25s; animation: tapBob 1.6s ease-in-out infinite;
 }
-#callBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--tangerine-deep), 0 6px 14px rgba(0,0,0,.25); }
-#callBtn[disabled] { filter: saturate(.3) brightness(.9); cursor: default; }
-#callBtn .left { font: 800 14px/1 var(--body); background: rgba(255,255,255,.25); border-radius: 999px; padding: 6px 9px 5px; font-variant-numeric: tabular-nums; }
-.hint { font: 700 12px/1 var(--body); color: var(--biscuit); opacity: .75; transition: opacity .6s; }
+.tapmama svg { width: 28px; height: 28px; }
+.tapmama::before, .tapmama::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 3px solid var(--tangerine); animation: ripple 1.6s ease-out infinite; }
+.tapmama::after { animation-delay: .8s; }
+.tapmama.off { opacity: 0; transform: scale(.5); pointer-events: none; }
+@keyframes tapBob { 50% { translate: 0 -5px; } }
+@keyframes ripple { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
+.btn.ghost.musicbtn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.musicbtn svg { width: 20px; height: 20px; }
+.btn.ghost.musicbtn[aria-pressed="false"] { opacity: .55; }
+.iconbtn.musicbtn[aria-pressed="false"] { opacity: .6; }
 
 /* speech bubbles, floaters */
 #overlay3d { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
@@ -174,6 +191,8 @@ body {
 .lg svg { width: 22px; height: 22px; flex: none; }
 .lg div { display: grid; line-height: 1.1; min-width: 0; }
 .lg b { font: 800 15px/1 var(--display); font-variant-numeric: tabular-nums; }
+.lg .stars { padding-left: 0; border-left: 0; }
+.lg .stars svg { width: 13px; height: 13px; }
 .lg small { font: 800 11px/1.2 var(--body); font-variant-numeric: tabular-nums; }
 .lg small .w { color: var(--win); } .lg small .l { color: var(--lose); }
 .jprule { display: flex; align-items: center; justify-content: center; gap: 8px; font: 800 13px/1 var(--body); }
@@ -226,7 +245,7 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
 @keyframes quake { 0%, 100% { translate: 0 0; } 10% { translate: -9px 4px; } 25% { translate: 8px -5px; } 40% { translate: -7px -3px; } 55% { translate: 6px 5px; } 70% { translate: -4px 2px; } 85% { translate: 3px -2px; } }
 #app.playing .hud, #app.playing .dock { opacity: 1; }
 #app:not(.playing) .hud, #app:not(.playing) .dock { opacity: 0; pointer-events: none; }
-#app:not(.playing) #callBtn { pointer-events: none; }
+#app:not(.playing) .tapmama { opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
@@ -238,20 +257,16 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
   <div id="overlay3d">
     <div class="bubble" id="mamaBubble"></div>
     <div class="bubble kid" id="kidBubble"></div>
+    <button class="tapmama off" id="tapMama" aria-label="Call Mama"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></button>
   </div>
   <div id="fx"><div class="fxicon"></div></div>
 
   <div class="hud">
-    <div class="hud-row">
-      <div class="stat score"><small>Score</small><b id="scoreVal">0</b></div>
-      <div class="stat"><small>Jackpot</small><div class="pips" id="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div></div>
-      <button class="iconbtn" id="muteBtn" aria-label="Mute sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" id="muteIcon"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
-    </div>
     <div class="scen" id="scenChip">
       <span class="ic" id="scenIcon"></span>
       <span class="name" id="scenName">iPad</span>
+      <span class="stars" id="scenStars" aria-label="Difficulty"></span>
       <span class="odds"><span class="w" id="scenWin">+20</span><span class="l" id="scenLose">−10</span></span>
-      <span class="pct" id="scenPct">60%</span>
     </div>
     <div class="mood" title="Mama's patience">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 .5 9z"/></svg>
@@ -260,8 +275,13 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
   </div>
 
   <div class="dock">
-    <button id="callBtn"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>Call Mama <span class="left" id="callsLeft">30</span></button>
-    <div class="hint" id="hint">Tap the floor to walk around</div>
+    <div class="hint" id="hint">Tap Mama to call her · Double tap to jump</div>
+    <div class="hud-row tray">
+      <div class="stat score"><small>Score</small><b id="scoreVal">0</b></div>
+      <div class="stat"><small>Calls</small><b id="callsLeft">30</b></div>
+      <div class="stat"><small>Jackpot</small><div class="pips" id="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div></div>
+      <button class="iconbtn musicbtn" id="musicHud" aria-label="Music" aria-pressed="true"></button>
+    </div>
   </div>
 
   <div id="jackpot"><div class="card"><b>JACKPOT</b><span id="jpAmt">+300</span></div></div>
@@ -275,7 +295,10 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
         <input id="nameInput" maxlength="14" autocomplete="nickname" placeholder="e.g. Little Mei">
       </label>
       <button class="btn primary" id="startBtn">Start · 30 calls</button>
-      <button class="btn ghost" id="boardBtn">Leaderboard</button>
+      <div class="row2">
+        <button class="btn ghost musicbtn" id="musicStart" aria-pressed="true"></button>
+        <button class="btn ghost" id="boardBtn">Leaderboard</button>
+      </div>
     </div>
   </section>
 
@@ -307,12 +330,15 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
 
 /* ---------------- game rules ---------------- */
 const TOTAL_CALLS = 30, JACKPOT = 300, STREAK_FOR_JP = 4;
+// stars = difficulty shown to the player; reply = seconds before Mama reacts; dur = how long the moment lasts
 const SCEN = {
-  boring: { name: "Boring…",      p: .80, win: 10,  lose: 5,  weight: 25, dur: [7, 10] },
-  ipad:   { name: "iPad",         p: .60, win: 20,  lose: 10, weight: 35, dur: [6, 9] },
-  duo:    { name: "iPad + Phone", p: .40, win: 45,  lose: 20, weight: 25, dur: [6, 9] },
-  climax: { name: "Climax!",      p: .25, win: 100, lose: 30, weight: 15, dur: [5, 7] },
+  boring: { name: "Boring…",      p: .80, win: 10,  lose: 5,  weight: 25, stars: 1, reply: .45, dur: [3.5, 5.5] },
+  ipad:   { name: "iPad",         p: .60, win: 20,  lose: 10, weight: 35, stars: 2, reply: .65, dur: [4, 6] },
+  duo:    { name: "iPad + Phone", p: .40, win: 45,  lose: 20, weight: 25, stars: 3, reply: .85, dur: [3.5, 5] },
+  climax: { name: "Climax!",      p: .25, win: 100, lose: 30, weight: 15, stars: 5, reply: 1.15, dur: [3, 4.5] },
 };
+const STAR = '<svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linejoin="round"><path class="CLS" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>';
+const starsHtml = n => Array.from({ length: 5 }, (_, i) => STAR.replace("CLS", i < n ? "on" : "off")).join("");
 const ICONS = {
   ipad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="3" width="16" height="18" rx="2.5"/><circle cx="12" cy="18" r=".9" fill="currentColor"/></svg>',
   duo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2.5" y="4" width="13" height="16" rx="2"/><rect x="15.5" y="9" width="6.5" height="11" rx="1.5" fill="currentColor" fill-opacity=".25"/></svg>',
@@ -320,7 +346,7 @@ const ICONS = {
   boring: '<svg viewBox="0 0 24 24" fill="currentColor"><text x="3" y="20" font-family="Baloo 2, sans-serif" font-weight="800" font-size="13">z</text><text x="11" y="13" font-family="Baloo 2, sans-serif" font-weight="800" font-size="10">z</text><text x="17" y="7" font-family="Baloo 2, sans-serif" font-weight="800" font-size="7">z</text></svg>',
 };
 const LINES = {
-  kid: ["Mama!", "Mama~", "Mamaaa!", "MAMA!!"],
+  kid: ["Mummy!", "Mummy~", "Mummyyy!", "MUMMY!!"],
   lookResp: ["Yes, dear?", "What is it?", "Hmm? Tell me.", "Yes sayang?"],
   noLookResp: ["Yes?", "What?", "Say again?", "Hmm?", "Wait ah…", "Ok ok…", "Later ya…"],
   angry: ["Stop calling!", "Aiyo! Not now!", "Mama is BUSY!", "Don't disturb!"],
@@ -334,12 +360,12 @@ const fmt = n => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n);
 const $ = id => document.getElementById(id);
 const app = $("app"), canvas = $("scene");
 const ui = {
-  score: $("scoreVal"), pips: [...$("pips").children], calls: $("callsLeft"), call: $("callBtn"),
-  chip: $("scenChip"), sIcon: $("scenIcon"), sName: $("scenName"), sWin: $("scenWin"), sLose: $("scenLose"), sPct: $("scenPct"),
+  score: $("scoreVal"), pips: [...$("pips").children], calls: $("callsLeft"), tap: $("tapMama"),
+  chip: $("scenChip"), sIcon: $("scenIcon"), sName: $("scenName"), sWin: $("scenWin"), sLose: $("scenLose"), sStars: $("scenStars"),
   mood: $("moodFill"), hint: $("hint"), mamaB: $("mamaBubble"), kidB: $("kidBubble"), overlay: $("overlay3d"),
 };
 $("legend").innerHTML = Object.entries(SCEN).map(([k, s]) =>
-  `<div class="lg">${ICONS[k]}<div><b>${Math.round(s.p * 100)}%</b><small><span class="w">+${s.win}</span> / <span class="l">−${s.lose}</span></small></div></div>`).join("");
+  `<div class="lg">${ICONS[k]}<div><span class="stars">${starsHtml(s.stars)}</span><small><span class="w">+${s.win}</span> / <span class="l">−${s.lose}</span></small></div></div>`).join("");
 
 /* ---------------- three.js scene ---------------- */
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -354,7 +380,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color("#3b2a2a");
 scene.fog = new THREE.Fog("#3b2a2a", 16, 30);
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 60);
-const camTarget = new THREE.Vector3(0, 0.75, -0.25);
+const camTarget = new THREE.Vector3(0, 0.6, -0.35);
 const camDir = new THREE.Vector3(0, 0.78, 1).normalize();
 let camDist = 10, camZoom = 0;
 
@@ -536,6 +562,10 @@ for (const s of [-1, 1]) {
 }
 const mouth = mesh(new THREE.SphereGeometry(.03, 10, 8), M("#a8434a"), 0, .14, .255, headPivot); mouth.scale.set(1.4, .55, .5);
 const mamaAnchor = new THREE.Object3D(); mamaAnchor.position.set(0, .72, 0); headPivot.add(mamaAnchor);
+// where the "tap Mama" button floats (her lap), and an invisible box that makes her whole body tappable
+const tapAnchor = new THREE.Object3D(); tapAnchor.position.set(0, seatY + .12, .55); mama.add(tapAnchor);
+const mamaHit = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.7, 1.1), new THREE.MeshBasicMaterial({ visible: false }));
+mamaHit.position.set(0, .85, .2); mama.add(mamaHit);
 
 // devices
 const ipad = new THREE.Group(); ipad.position.set(0, seatY + .58, .44); ipad.rotation.x = .55; mama.add(ipad);
@@ -601,15 +631,16 @@ function updateParts(dt) {
 }
 
 /* ---------------- audio ---------------- */
-const Snd = { ctx: null, muted: false };
-try { Snd.muted = localStorage.getItem("ipadmama-muted") === "1"; } catch (e) {}
+const Snd = { ctx: null, musicOn: true };
+try { Snd.musicOn = localStorage.getItem("ipadmama-music") !== "off"; } catch (e) {}
+const musicLevel = () => !Snd.musicOn ? 0 : state.scen === "climax" ? .14 : .3;
 function audioInit() {
   if (Snd.ctx) { Snd.ctx.resume(); return; }
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
   const ctx = Snd.ctx = new AC();
-  Snd.master = ctx.createGain(); Snd.master.gain.value = Snd.muted ? 0 : .9; Snd.master.connect(ctx.destination);
+  Snd.master = ctx.createGain(); Snd.master.gain.value = .9; Snd.master.connect(ctx.destination);
   Snd.musicLP = ctx.createBiquadFilter(); Snd.musicLP.type = "lowpass"; Snd.musicLP.frequency.value = 2400;
-  Snd.music = ctx.createGain(); Snd.music.gain.value = .3; Snd.music.connect(Snd.musicLP); Snd.musicLP.connect(Snd.master);
+  Snd.music = ctx.createGain(); Snd.music.gain.value = musicLevel(); Snd.music.connect(Snd.musicLP); Snd.musicLP.connect(Snd.master);
   Snd.sfx = ctx.createGain(); Snd.sfx.gain.value = .75; Snd.sfx.connect(Snd.master);
   // vinyl crackle bed
   const nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = nb.getChannelData(0);
@@ -678,16 +709,40 @@ const sfx = {
     const g = c.createGain(); g.gain.setValueAtTime(.0001, t + .5); g.gain.linearRampToValueAtTime(.25, t + .6); g.gain.exponentialRampToValueAtTime(.0001, t + 2);
     src.connect(hp); hp.connect(g); g.connect(Snd.sfx); src.start(t + .5); src.stop(t + 2.1); },
 };
-function setMuted(m) {
-  Snd.muted = m; try { localStorage.setItem("ipadmama-muted", m ? "1" : "0"); } catch (e) {}
-  if (Snd.master) Snd.master.gain.setTargetAtTime(m ? 0 : .9, Snd.ctx.currentTime, .05);
-  $("muteIcon").innerHTML = m
-    ? '<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/>'
-    : '<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>';
-  $("muteBtn").setAttribute("aria-label", m ? "Unmute sound" : "Mute sound");
+const NOTE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>';
+const NOTE_OFF_SVG = NOTE_SVG.replace("</svg>", '<path d="M3 3l18 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>');
+function setMusic(on) {
+  Snd.musicOn = on; try { localStorage.setItem("ipadmama-music", on ? "on" : "off"); } catch (e) {}
+  if (Snd.ctx) Snd.music.gain.setTargetAtTime(musicLevel(), Snd.ctx.currentTime, .15);
+  const hud = $("musicHud"), start = $("musicStart");
+  hud.innerHTML = on ? NOTE_SVG : NOTE_OFF_SVG;
+  start.innerHTML = (on ? NOTE_SVG : NOTE_OFF_SVG) + (on ? "Music on" : "Music off");
+  for (const b of [hud, start]) { b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "Turn music off" : "Turn music on"); }
 }
-setMuted(Snd.muted);
-$("muteBtn").addEventListener("click", () => { audioInit(); setMuted(!Snd.muted); });
+for (const id of ["musicHud", "musicStart"]) $(id).addEventListener("click", () => { audioInit(); setMusic(!Snd.musicOn); });
+
+/* ---------------- voices (browser speech) ---------------- */
+const Voice = { ok: "speechSynthesis" in window, list: [] };
+function loadVoices() { try { Voice.list = speechSynthesis.getVoices(); } catch (e) {} }
+if (Voice.ok) { loadVoices(); try { speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch (e) {} }
+function pickVoice() {
+  const en = Voice.list.filter(v => /^en/i.test(v.lang));
+  for (const re of [/samantha/i, /karen/i, /tessa/i, /moira/i, /zira/i, /aria/i, /jenny/i, /female/i, /google uk english/i, /google us english/i]) {
+    const v = en.find(x => re.test(x.name)); if (v) return v;
+  }
+  return en[0] || null;
+}
+// who: "kid" (high, quick) or "mama"; returns false when the browser cannot speak
+function speak(text, who, angry = false) {
+  if (!Voice.ok) return false;
+  try {
+    const u = new SpeechSynthesisUtterance(text.replace(/…/g, ""));
+    const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
+    if (who === "kid") { speechSynthesis.cancel(); u.pitch = 2; u.rate = 1.15; }
+    else { u.pitch = angry ? .75 : 1.1; u.rate = angry ? 1.25 : .95; }
+    u.volume = 1; speechSynthesis.speak(u); return true;
+  } catch (e) { return false; }
+}
 
 /* ---------------- game state ---------------- */
 const state = {
@@ -698,12 +753,12 @@ const state = {
 function setScen(k) {
   state.scen = k; const s = SCEN[k]; state.scenT = rand(...s.dur);
   ui.sIcon.innerHTML = ICONS[k]; ui.sName.textContent = s.name;
-  ui.sWin.textContent = "+" + s.win; ui.sLose.textContent = "−" + s.lose; ui.sPct.textContent = Math.round(s.p * 100) + "%";
+  ui.sWin.textContent = "+" + s.win; ui.sLose.textContent = "−" + s.lose; ui.sStars.innerHTML = starsHtml(s.stars);
   ui.chip.classList.remove("swap"); void ui.chip.offsetWidth; ui.chip.classList.add("swap");
   app.classList.toggle("climax", k === "climax");
   if (Snd.ctx) {
     const t = Snd.ctx.currentTime;
-    Snd.music.gain.setTargetAtTime(k === "climax" ? .14 : .3, t, .4);
+    Snd.music.gain.setTargetAtTime(musicLevel(), t, .4);
     Snd.musicLP.frequency.setTargetAtTime(k === "climax" ? 700 : k === "boring" ? 1500 : 2400, t, .4);
   }
 }
@@ -714,6 +769,10 @@ function nextScen() {
   setScen(keys[0]);
 }
 setScen("ipad");
+setMusic(Snd.musicOn);
+
+// show the "tap Mama" target only when a call can be made
+function setReady(on) { ui.tap.classList.toggle("off", !on); }
 
 function renderHud() {
   ui.score.textContent = state.score;
@@ -775,23 +834,25 @@ function resolveCall(s) {
 function callMama() {
   if (!state.playing || state.busy || state.calls <= 0) return;
   audioInit();
-  state.busy = true; ui.call.disabled = true;
+  state.busy = true; setReady(false);
   state.calls--; ui.calls.textContent = state.calls;
   const k = state.scen, s = SCEN[k];
   state.annoy = clamp(state.annoy + 22 + (k === "climax" ? 14 : k === "duo" ? 6 : 0), 0, 100);
   const lvl = state.annoy > 75 ? 3 : state.annoy > 55 ? 2 : state.annoy > 35 ? 1 : 0;
-  say(ui.kidB, LINES.kid[lvl], "", 1100); sfx.call(lvl); state.kidHop = 1;
+  const line = LINES.kid[lvl];
+  say(ui.kidB, line, "", 1100); state.kidHop = 1;
+  if (!speak(line, "kid")) sfx.call(lvl);
   ui.hint.style.opacity = 0;
   const outcome = resolveCall(s);
-  setTimeout(() => react(outcome, s), k === "climax" ? 1250 : 950);
+  setTimeout(() => react(outcome, s), s.reply * 1000);
 }
 function react(o, s) {
-  let pts = 0, good = false;
-  if (o === "lookResp") { pts = s.win; good = true; look(1.8); say(ui.mamaB, pick(LINES.lookResp), "", 2000); sfx.good(); screenFx("joy"); }
-  else if (o === "noLookResp") { pts = Math.round(s.win * .6); good = true; say(ui.mamaB, pick(LINES.noLookResp), "", 1900); sfx.soft(); screenFx("happy"); }
-  else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1500); sfx.meh(); screenFx("sad"); }
+  let pts = 0, good = false, line;
+  if (o === "lookResp") { pts = s.win; good = true; look(1.8); line = pick(LINES.lookResp); say(ui.mamaB, line, "", 2000); speak(line, "mama"); sfx.good(); screenFx("joy"); }
+  else if (o === "noLookResp") { pts = Math.round(s.win * .6); good = true; line = pick(LINES.noLookResp); say(ui.mamaB, line, "", 1900); speak(line, "mama"); sfx.soft(); screenFx("happy"); }
+  else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1500); speak("Hmm.", "mama"); sfx.meh(); screenFx("sad"); }
   else if (o === "noLookNo") { pts = -s.lose; say(ui.mamaB, "…", "faint", 1400); sfx.ignore(); screenFx("sad"); }
-  else { pts = -s.lose * 2; look(2.2); state.angryT = 2.2; say(ui.mamaB, pick(LINES.angry), "angry", 2200); sfx.angry(); screenFx("angry"); state.annoy = 100; }
+  else { pts = -s.lose * 2; look(2.2); state.angryT = 2.2; line = pick(LINES.angry); say(ui.mamaB, line, "angry", 2200); speak(line, "mama", true); sfx.angry(); screenFx("angry"); state.annoy = 100; }
   state.score += pts; floater(fmt(pts), good);
   state.kidMood = good ? 1 : -1; state.kidMoodT = 1.6;
   if (good) for (let i = 0; i < 4; i++) emit(T.heart, kidAnchor.getWorldPosition(new THREE.Vector3()), { size: .16, life: 1.2, vel: [0, .7, 0] });
@@ -803,9 +864,9 @@ function react(o, s) {
     if (jp) jackpot();
     setTimeout(() => {
       state.busy = false;
-      if (state.calls <= 0) endGame(); else ui.call.disabled = false;
-    }, jp ? 2400 : 800);
-  }, 900);
+      if (state.calls <= 0) endGame(); else setReady(true);
+    }, jp ? 2200 : 300);
+  }, 450);
 }
 function jackpot() {
   state.jackpots++; state.score += JACKPOT; state.streak = 0;
@@ -823,7 +884,7 @@ function jackpot() {
   for (let i = 0; i < 16; i++) emit(T.star, kp, { size: .2, life: 1.6, spread: .3, vel: [rand(-.6, .6), rand(.6, 1.3), rand(-.3, .3)] });
 }
 function look(t) { state.look = 1; state.lookT = t; }
-ui.call.addEventListener("click", callMama);
+ui.tap.addEventListener("click", callMama);
 
 /* ---------------- walking ---------------- */
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -878,6 +939,7 @@ canvas.addEventListener("pointerdown", e => {
   ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
   if (ray.intersectObject(lampHit).length) { toggleLamp(); return; }
+  if (state.playing && ray.intersectObject(mamaHit).length) { callMama(); return; }
   const p = new THREE.Vector3(); if (!ray.ray.intersectPlane(floorPlane, p)) return;
   p.x = clamp(p.x, -3.2, 3.2); p.z = clamp(p.z, -1.45, 2.9);
   if (inTable(p.x, p.z)) p.z = p.z < -.75 ? -1.35 : -.15;
@@ -1019,6 +1081,7 @@ function loop() {
   camera.lookAt(camTarget);
 
   // html overlay positions
+  { const [tx, ty] = toScreen(tapAnchor); ui.tap.style.left = tx + "px"; ui.tap.style.top = ty + "px"; }
   const minY = hudBottom();
   for (const [el, anchor] of [[ui.mamaB, mamaAnchor], [ui.kidB, kidAnchor]]) {
     const [x, y] = toScreen(anchor), half = el.offsetWidth / 2 + 8;
@@ -1032,7 +1095,7 @@ function resize() {
   const w = app.clientWidth, h = app.clientHeight;
   renderer.setSize(w, h, false); camera.aspect = w / h;
   const hf = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
-  camDist = clamp(Math.max(2.3 / Math.tan(hf / 2), 3.6 / Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)), 6, 12);
+  camDist = clamp(Math.max(2.05 / Math.tan(hf / 2), 3.3 / Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)), 6, 12);
   camera.updateProjectionMatrix();
 }
 window.addEventListener("resize", resize); resize();
@@ -1102,14 +1165,15 @@ function startGame() {
   const n = nameInput.value.trim();
   if (!n) { nameInput.classList.remove("err"); void nameInput.offsetWidth; nameInput.classList.add("err"); nameInput.focus(); return; }
   try { localStorage.setItem("ipadmama-name", n); } catch (e) {}
-  audioInit(); setMuted(Snd.muted);
+  audioInit();
   Object.assign(state, { playing: true, busy: false, name: n, score: 0, calls: TOTAL_CALLS, streak: 0, jackpots: 0, annoy: 0 });
-  renderHud(); ui.call.disabled = false; ui.hint.style.opacity = .75;
+  renderHud(); setReady(true); ui.hint.style.opacity = .9;
   $("startScreen").hidden = true; $("endScreen").hidden = true; $("boardScreen").hidden = true;
   app.classList.add("playing");
   setScen("ipad");
 }
 function endGame() {
+  setReady(false);
   state.playing = false; app.classList.remove("playing");
   $("finalScore").textContent = state.score;
   $("finalJp").textContent = state.jackpots ? `★ Hit the jackpot${state.jackpots > 1 ? " ×" + state.jackpots : ""}!` : "No jackpot this time";
