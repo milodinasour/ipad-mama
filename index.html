@@ -120,7 +120,11 @@ body {
 .hint { font: 700 12px/1 var(--body); color: var(--biscuit); opacity: .75; transition: opacity .6s; }
 
 /* speech bubbles, floaters */
-#overlay3d { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+#overlay3d { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
+.hud, .dock { z-index: 2; }
+#jackpot { z-index: 5; }
+.screen { z-index: 6; }
+.bubble.mama { font-size: 21px; padding: 9px 15px 6px; box-shadow: 0 5px 0 rgba(62,42,44,.25), 0 8px 20px rgba(0,0,0,.25); }
 .bubble {
   position: absolute; left: 0; top: 0; transform: translate(-50%, -100%);
   background: #fff; color: var(--cocoa); font: 800 17px/1.1 var(--display);
@@ -202,6 +206,24 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
 .board .sc { font: 800 18px/1 var(--display); font-variant-numeric: tabular-nums; text-align: right; min-width: 44px; }
 .board li.empty { display: block; font: 700 14px/1.4 var(--body); opacity: .65; text-align: center; padding: 14px 6px; background: var(--biscuit-2); border-radius: 12px; }
 .row2 { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+/* reaction effects: joy (looked + replied), happy (replied), sad (ignored), angry */
+#fx { position: absolute; inset: 0; pointer-events: none; z-index: 4; opacity: 0; display: grid; place-items: center; overflow: hidden; }
+#fx .fxicon { width: 110px; height: 110px; margin-top: 26vh; }
+#fx .fxicon svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 0 rgba(62,42,44,.25)); }
+#fx.joy, #fx.happy { background: radial-gradient(ellipse at 50% 45%, rgba(255,214,120,0) 35%, rgba(255,186,90,.7) 100%); animation: fxGlow 1.5s ease-out forwards; }
+#fx.happy { background: radial-gradient(ellipse at 50% 45%, rgba(255,214,120,0) 45%, rgba(255,196,110,.5) 100%); }
+#fx.sad { background: radial-gradient(ellipse at 50% 45%, rgba(90,100,130,0) 30%, rgba(60,70,100,.55) 100%); animation: fxGlow 1.4s ease-out forwards; }
+#fx.angry { background: radial-gradient(ellipse at 50% 45%, rgba(255,40,40,.18) 15%, rgba(190,0,20,.8) 100%); animation: fxAngry 1.8s ease-out forwards; }
+#fx.joy .fxicon, #fx.happy .fxicon, #fx.angry .fxicon { animation: fxPop 1.4s ease-out forwards; }
+#fx.angry .fxicon { animation: fxPop 1.6s ease-out forwards, fxJitter .08s linear 8; }
+@keyframes fxGlow { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fxAngry { 0% { opacity: 0; } 6% { opacity: 1; } 14% { opacity: .55; } 22% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fxPop { 0% { transform: scale(.2) rotate(-12deg); opacity: 0; } 18% { transform: scale(1.25) rotate(4deg); opacity: 1; } 32% { transform: scale(1); } 75% { opacity: 1; } 100% { transform: scale(1.1) translateY(-30px); opacity: 0; } }
+@keyframes fxJitter { 0%, 100% { translate: 0 0; } 25% { translate: -6px 3px; } 75% { translate: 6px -3px; } }
+.fxheart { position: absolute; bottom: -40px; width: 30px; height: 30px; animation: fxRise linear forwards; }
+@keyframes fxRise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-70vh) scale(1.2) rotate(20deg); opacity: 0; } }
+#app.quake .hud, #app.quake .dock, #app.quake #scene { animation: quake .5s linear; }
+@keyframes quake { 0%, 100% { translate: 0 0; } 10% { translate: -9px 4px; } 25% { translate: 8px -5px; } 40% { translate: -7px -3px; } 55% { translate: 6px 5px; } 70% { translate: -4px 2px; } 85% { translate: 3px -2px; } }
 #app.playing .hud, #app.playing .dock { opacity: 1; }
 #app:not(.playing) .hud, #app:not(.playing) .dock { opacity: 0; pointer-events: none; }
 #app:not(.playing) #callBtn { pointer-events: none; }
@@ -217,6 +239,7 @@ input#nameInput.err { border-color: var(--lose); animation: shake .35s; }
     <div class="bubble" id="mamaBubble"></div>
     <div class="bubble kid" id="kidBubble"></div>
   </div>
+  <div id="fx"><div class="fxicon"></div></div>
 
   <div class="hud">
     <div class="hud-row">
@@ -353,7 +376,7 @@ function setLimb(m, a, b) {
 }
 
 // lights
-scene.add(new THREE.HemisphereLight("#ffe2c4", "#5a3b3b", .55));
+const hemi = new THREE.HemisphereLight("#ffe2c4", "#5a3b3b", .55); scene.add(hemi);
 const lampLight = new THREE.PointLight("#ffb46b", 1.6, 11, 1.6);
 lampLight.position.set(1.85, 2.15, -2.05); lampLight.castShadow = true;
 lampLight.shadow.mapSize.set(1024, 1024); lampLight.shadow.bias = -0.002; lampLight.shadow.radius = 4;
@@ -454,6 +477,10 @@ mesh(new THREE.CylinderGeometry(.22, .25, .05, 20), M("#5c3b2e"), 1.85, .03, -2.
 mesh(new THREE.CylinderGeometry(.025, .025, 2.0, 8), M("#5c3b2e"), 1.85, 1.05, -2.15);
 const shade = mesh(new THREE.CylinderGeometry(.22, .36, .42, 24, 1, true), new THREE.MeshStandardMaterial({ color: "#ffe2b0", emissive: "#ffb76b", emissiveIntensity: .9, side: THREE.DoubleSide }), 1.85, 2.15, -2.15);
 shade.castShadow = false;
+const SHADE_ON = new THREE.Color("#ffe2b0"), SHADE_OFF = new THREE.Color("#9c8a78");
+// invisible, generous tap target around the whole lamp
+const lampHit = new THREE.Mesh(new THREE.BoxGeometry(.9, 2.6, .9), new THREE.MeshBasicMaterial({ visible: false }));
+lampHit.position.set(1.85, 1.25, -2.15); scene.add(lampHit);
 
 // side shelf + plant
 mesh(new THREE.BoxGeometry(.7, .7, .5), M("#a8705a"), -2.2, .35, -2.4);
@@ -640,6 +667,9 @@ const sfx = {
   ignore() { const c = Snd.ctx; if (!c) return; const t = c.currentTime; tone(260, t, .25, { type: "sine", gain: .12, glideTo: 180 }); tone(180, t + .22, .4, { type: "sine", gain: .1, glideTo: 120 }); },
   angry() { const c = Snd.ctx; if (!c) return; const t = c.currentTime;
     tone(220, t, .5, { type: "sawtooth", gain: .07, glideTo: 90 }); tone(233, t, .5, { type: "square", gain: .04, glideTo: 95 }); },
+  boing() { const c = Snd.ctx; if (!c) return; const t = c.currentTime; tone(280, t, .22, { gain: .12, glideTo: 620 }); },
+  land() { const c = Snd.ctx; if (!c) return; const t = c.currentTime; tone(140, t, .12, { gain: .18, glideTo: 70 }); },
+  click(on) { const c = Snd.ctx; if (!c) return; const t = c.currentTime; tone(on ? 1800 : 1200, t, .04, { type: "square", gain: .05, attack: .001 }); tone(on ? 900 : 600, t + .05, .05, { type: "square", gain: .04, attack: .001 }); },
   jackpot() { const c = Snd.ctx; if (!c) return; const t = c.currentTime;
     [72, 76, 79, 84, 88, 91, 96].forEach((n, i) => { tone(mtof(n), t + i * .075, .5, { type: "square", gain: .045 }); tone(mtof(n), t + i * .075, .7, { gain: .08 }); });
     for (let i = 0; i < 12; i++) { const tt = t + .55 + i * .11 + Math.random() * .05; tone(1976, tt, .25, { type: "triangle", gain: .05 }); tone(2637, tt + .05, .3, { type: "triangle", gain: .04 }); }
@@ -661,6 +691,7 @@ $("muteBtn").addEventListener("click", () => { audioInit(); setMuted(!Snd.muted)
 
 /* ---------------- game state ---------------- */
 const state = {
+  lampOn: true, shakeT: 0,
   playing: false, busy: false, name: "", score: 0, calls: TOTAL_CALLS, streak: 0, jackpots: 0, annoy: 0,
   scen: "ipad", scenT: 6, look: 0, lookT: 0, angryT: 0, yawnT: 0, kidMood: 0, kidMoodT: 0, kidHop: 0,
 };
@@ -694,7 +725,7 @@ function renderHud() {
 /* bubbles & floaters */
 const bubbleTimers = new Map();
 function say(el, text, cls = "", ms = 1600) {
-  el.className = "bubble " + (el === ui.kidB ? "kid " : "") + cls;
+  el.className = "bubble " + (el === ui.kidB ? "kid " : "mama ") + cls;
   el.textContent = text; void el.offsetWidth; el.classList.add("show");
   clearTimeout(bubbleTimers.get(el));
   bubbleTimers.set(el, setTimeout(() => el.classList.remove("show"), ms));
@@ -704,11 +735,34 @@ function toScreen(obj) {
   obj.getWorldPosition(projV); projV.project(camera);
   return [(projV.x + 1) / 2 * app.clientWidth, (1 - projV.y) / 2 * app.clientHeight];
 }
+// lowest point the top bar reaches, so bubbles and points never hide under it
+const hudEl = document.querySelector(".hud");
+const hudBottom = () => hudEl.offsetTop + hudEl.offsetHeight + 10;
 function floater(text, good) {
   const [x, y] = toScreen(mamaAnchor);
   const f = document.createElement("div"); f.className = "floater " + (good ? "w" : "l");
-  f.textContent = text; f.style.left = x + "px"; f.style.top = (y - 30) + "px";
+  f.textContent = text;
+  f.style.left = clamp(x + 78, 40, app.clientWidth - 40) + "px";
+  f.style.top = Math.max(y + 10, hudBottom() + 70) + "px";
   ui.overlay.appendChild(f); setTimeout(() => f.remove(), 1700);
+}
+
+/* full-screen reaction effects */
+const fxEl = $("fx"), fxIcon = fxEl.querySelector(".fxicon");
+const HEART_SVG = '<svg viewBox="0 0 24 24"><path fill="#ff6b8a" d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.6 4.5 7.3 4.5c2 0 3.5 1.1 4.7 2.7 1.2-1.6 2.7-2.7 4.7-2.7 3.7 0 5.9 3.9 4.6 7.3C19.5 16.4 12 21 12 21z"/><ellipse cx="7.6" cy="8.6" rx="1.8" ry="1.2" fill="#fff" opacity=".7" transform="rotate(-30 7.6 8.6)"/></svg>';
+const ANGER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#e8283c" stroke-width="2.6" stroke-linecap="round"><path d="M9.5 3.5c0 3 -1 5 -5 6"/><path d="M14.5 3.5c0 3 1 5 5 6"/><path d="M9.5 20.5c0 -3 -1 -5 -5 -6"/><path d="M14.5 20.5c0 -3 1 -5 5 -6"/></svg>';
+function screenFx(kind) {
+  fxEl.className = ""; void fxEl.offsetWidth; fxEl.className = kind;
+  fxIcon.innerHTML = kind === "angry" ? ANGER_SVG : kind === "sad" ? "" : HEART_SVG;
+  if (kind === "joy" || kind === "happy") {
+    for (let i = 0; i < (kind === "joy" ? 14 : 6); i++) {
+      const h = document.createElement("i"); h.className = "fxheart"; h.innerHTML = HEART_SVG;
+      h.style.left = rand(4, 92) + "%"; h.style.animationDuration = rand(1.3, 2.1) + "s"; h.style.animationDelay = rand(0, .35) + "s";
+      const s = rand(20, 40); h.style.width = h.style.height = s + "px";
+      fxEl.appendChild(h); setTimeout(() => h.remove(), 2600);
+    }
+  }
+  if (kind === "angry") { state.shakeT = .6; app.classList.remove("quake"); void app.offsetWidth; app.classList.add("quake"); }
 }
 
 /* ---------------- the call ---------------- */
@@ -733,11 +787,11 @@ function callMama() {
 }
 function react(o, s) {
   let pts = 0, good = false;
-  if (o === "lookResp") { pts = s.win; good = true; look(1.8); say(ui.mamaB, pick(LINES.lookResp)); sfx.good(); }
-  else if (o === "noLookResp") { pts = Math.round(s.win * .6); good = true; say(ui.mamaB, pick(LINES.noLookResp)); sfx.soft(); }
-  else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1300); sfx.meh(); }
-  else if (o === "noLookNo") { pts = -s.lose; say(ui.mamaB, "…", "faint", 1100); sfx.ignore(); }
-  else { pts = -s.lose * 2; look(2.2); state.angryT = 2.2; say(ui.mamaB, pick(LINES.angry), "angry", 2000); sfx.angry(); state.annoy = 100; }
+  if (o === "lookResp") { pts = s.win; good = true; look(1.8); say(ui.mamaB, pick(LINES.lookResp), "", 2000); sfx.good(); screenFx("joy"); }
+  else if (o === "noLookResp") { pts = Math.round(s.win * .6); good = true; say(ui.mamaB, pick(LINES.noLookResp), "", 1900); sfx.soft(); screenFx("happy"); }
+  else if (o === "lookNo") { pts = -Math.round(s.lose * .5); look(1.4); say(ui.mamaB, "…", "faint", 1500); sfx.meh(); screenFx("sad"); }
+  else if (o === "noLookNo") { pts = -s.lose; say(ui.mamaB, "…", "faint", 1400); sfx.ignore(); screenFx("sad"); }
+  else { pts = -s.lose * 2; look(2.2); state.angryT = 2.2; say(ui.mamaB, pick(LINES.angry), "angry", 2200); sfx.angry(); screenFx("angry"); state.annoy = 100; }
   state.score += pts; floater(fmt(pts), good);
   state.kidMood = good ? 1 : -1; state.kidMoodT = 1.6;
   if (good) for (let i = 0; i < 4; i++) emit(T.heart, kidAnchor.getWorldPosition(new THREE.Vector3()), { size: .16, life: 1.2, vel: [0, .7, 0] });
@@ -773,17 +827,71 @@ ui.call.addEventListener("click", callMama);
 
 /* ---------------- walking ---------------- */
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-const kidTarget = kid.position.clone();
+// kid modes: "floor" (walks a path, can hop), "air" (jumping to / from the sofa), "sofa" (sitting)
+const SEAT_Y = .42, SEAT_Z = -2.05, SOFA_FRONT_Z = -1.4;
+const kidS = { mode: "floor", path: [], arc: null, seatX: 0, hopY: 0, vy: 0, wantSofa: false, pending: null };
+const nearSofa = p => p.z < -1.1 && Math.abs(p.x) < 1.45;
+const inTable = (x, z) => Math.abs(x) < .92 && z > -1.2 && z < -.3;
+function planPath(to) {
+  const from = kid.position, path = [];
+  let hits = false;
+  for (let i = 1; i < 24 && !hits; i++) { const t = i / 24; hits = inTable(from.x + (to.x - from.x) * t, from.z + (to.z - from.z) * t); }
+  if (hits) { // walk around the coffee table on the nearer side
+    const side = (from.x + to.x) >= 0 ? 1 : -1;
+    path.push(new THREE.Vector3(side * 1.18, 0, from.z < -.75 ? -1.35 : -.15));
+    path.push(new THREE.Vector3(side * 1.18, 0, to.z < -.75 ? -1.35 : -.15));
+  }
+  path.push(to.clone()); return path;
+}
+function startArc(to, land, h) {
+  kidS.mode = "air"; kidS.hopY = 0; kidS.vy = 0;
+  kidS.arc = { from: kid.position.clone(), to, land, h, t: 0, dur: .65 };
+  sfx.boing();
+}
+function jumpToSofa() {
+  kidS.path = []; kidS.wantSofa = false;
+  const seatX = kid.position.x < 0 ? -.85 : .85;
+  startArc(new THREE.Vector3(seatX, SEAT_Y, SEAT_Z), "sofa", .7);
+}
+function jumpOffSofa(then) {
+  kidS.pending = then || null;
+  startArc(new THREE.Vector3(kid.position.x, 0, SOFA_FRONT_Z + .1), "floor", .55);
+}
+function kidJump() {
+  if (kidS.mode === "air") return;
+  if (kidS.mode === "sofa") return jumpOffSofa();
+  if (nearSofa(kid.position)) return jumpToSofa();
+  if (kidS.hopY === 0) { kidS.vy = 3.4; kidS.hopY = .001; sfx.boing(); }
+}
+function walkTo(p) {
+  if (kidS.mode === "sofa") return jumpOffSofa(p);
+  if (kidS.mode === "air") { kidS.pending = p; return; }
+  kidS.path = planPath(p);
+}
+function toggleLamp() {
+  state.lampOn = !state.lampOn; sfx.click(state.lampOn);
+}
+let lastTap = { t: 0, x: 0, y: 0 };
 canvas.addEventListener("pointerdown", e => {
+  audioInit();
   const r = canvas.getBoundingClientRect();
   ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
+  if (ray.intersectObject(lampHit).length) { toggleLamp(); return; }
   const p = new THREE.Vector3(); if (!ray.ray.intersectPlane(floorPlane, p)) return;
-  p.x = clamp(p.x, -3.2, 3.2); p.z = clamp(p.z, -1.25, 2.9);
-  if (Math.abs(p.x) < .95 && p.z < -.2 && p.z > -1.3) p.z = -.15;
-  if (p.z < -1.25 + .01 && Math.abs(p.x) < 1.8) p.z = -1.2;
-  kidTarget.copy(p); marker.position.set(p.x, .02, p.z); marker.material.opacity = .9;
+  p.x = clamp(p.x, -3.2, 3.2); p.z = clamp(p.z, -1.45, 2.9);
+  if (inTable(p.x, p.z)) p.z = p.z < -.75 ? -1.35 : -.15;
   ui.hint.style.opacity = 0;
+  const now = performance.now(), dbl = now - lastTap.t < 330 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 70;
+  lastTap = dbl ? { t: 0, x: 0, y: 0 } : { t: now, x: e.clientX, y: e.clientY };
+  if (dbl) {
+    // double tap: hop, or hop onto / off the sofa
+    if (kidS.mode === "floor" && !nearSofa(kid.position) && nearSofa(p)) { kidS.wantSofa = true; return; }
+    return kidJump();
+  }
+  marker.position.set(p.x, .02, p.z); marker.material.opacity = .9;
+  kidS.wantSofa = false;
+  walkTo(p);
 });
 
 /* ---------------- loop ---------------- */
@@ -843,18 +951,47 @@ function loop() {
   mugT -= dt; if (mugT <= 0) { mugT = .7; emit(T.puff, steamPos, { size: .08, life: 1.6, grow: 2.5, spread: .02, color: "#fff7ee", vel: [0, .22, 0] }); }
   updateParts(dt);
 
-  // kid walking
-  const to = tmpV.subVectors(kidTarget, kid.position); to.y = 0;
-  const dist = to.length(), walking = dist > .04;
-  if (walking) {
-    const step = Math.min(dist, dt * 1.5); kid.position.addScaledVector(to.normalize(), step);
-    const ang = Math.atan2(to.x, to.z); let d = ang - kid.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); kid.rotation.y += d * Math.min(1, dt * 10);
+  // kid: walking path, hops, sofa jumps
+  const turnTo = (ang, rate) => { let d = ang - kid.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); kid.rotation.y += d * Math.min(1, dt * rate); };
+  let walking = false;
+  if (kidS.mode === "air") {
+    const a = kidS.arc; a.t = Math.min(1, a.t + dt / a.dur);
+    kid.position.lerpVectors(a.from, a.to, a.t); kid.position.y += Math.sin(a.t * Math.PI) * a.h;
+    if (a.from.distanceTo(a.to) > .1) turnTo(Math.atan2(a.to.x - a.from.x, a.to.z - a.from.z), 10);
+    if (a.t >= 1) {
+      kidS.mode = a.land; sfx.land();
+      if (a.land === "sofa") kidS.seatX = a.to.x;
+      else { kid.position.y = 0; if (kidS.pending) { kidS.path = planPath(kidS.pending); kidS.pending = null; } }
+    }
+  } else if (kidS.mode === "sofa") {
+    turnTo(kidS.seatX > 0 ? -.45 : .45, 6);
   } else {
-    marker.material.opacity *= .92;
-    if (state.busy) { const ang = Math.atan2(mama.position.x - kid.position.x, mama.position.z - kid.position.z); let d = ang - kid.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); kid.rotation.y += d * Math.min(1, dt * 6); }
+    if (kidS.path.length) {
+      const to = tmpV.subVectors(kidS.path[0], kid.position); to.y = 0;
+      const dist = to.length();
+      if (dist < .05) {
+        kidS.path.shift();
+        if (!kidS.path.length && kidS.wantSofa) { kidS.wantSofa = false; if (nearSofa(kid.position)) jumpToSofa(); }
+      } else {
+        walking = true;
+        kid.position.addScaledVector(to.normalize(), Math.min(dist, dt * 1.5));
+        turnTo(Math.atan2(to.x, to.z), 10);
+      }
+    }
+    if (!walking) {
+      marker.material.opacity *= .92;
+      if (state.busy) turnTo(Math.atan2(mama.position.x - kid.position.x, mama.position.z - kid.position.z), 6);
+    }
+    if (kidS.hopY > 0) { kidS.vy -= 9.8 * dt; kidS.hopY += kidS.vy * dt; if (kidS.hopY <= 0) { kidS.hopY = 0; kidS.vy = 0; sfx.land(); } }
+    kid.position.y = kidS.hopY;
   }
+  const sitting = kidS.mode === "sofa", airborne = kidS.mode === "air" || kidS.hopY > 0;
   const sw = walking ? Math.sin(tAcc * 12) : 0;
-  kLegs[0].position.z = sw * .07; kLegs[1].position.z = -sw * .07;
+  kLegs.forEach((l, i) => {
+    const s = i ? 1 : -1;
+    if (sitting) { l.rotation.x = Math.PI / 2; l.position.set(s * .08, .2, .13 + Math.sin(tAcc * 4 + i * 2) * .015); }
+    else { l.rotation.x = airborne ? s * .5 : 0; l.position.set(s * .08, .11, -s * sw * .07); }
+  });
   kArms[0].rotation.x = -sw * .6; kArms[1].rotation.x = sw * .6;
   state.kidHop = Math.max(0, state.kidHop - dt * 2.2);
   state.kidMoodT -= dt; if (state.kidMoodT <= 0) state.kidMood = 0;
@@ -862,22 +999,31 @@ function loop() {
   kidBody.position.y = (walking ? Math.abs(sw) * .04 : Math.sin(tAcc * 2) * .01) + Math.sin(state.kidHop * Math.PI) * .22 + happyBounce;
   kidHeadG.rotation.x = state.kidMood < 0 ? .35 : 0;
   kidHeadG.rotation.z = state.kidMood < 0 ? Math.sin(tAcc * 3) * .1 : Math.sin(tAcc * 1.5) * .05;
-  kArms.forEach((a, i) => { if (state.kidHop > 0 || state.kidMood > 0) a.rotation.z = (i ? 1 : -1) * 2.4; else a.rotation.z += (((i ? 1 : -1) * .4) - a.rotation.z) * .2; });
+  kArms.forEach((a, i) => { if (state.kidHop > 0 || state.kidMood > 0 || airborne) a.rotation.z = (i ? 1 : -1) * 2.4; else a.rotation.z += (((i ? 1 : -1) * .4) - a.rotation.z) * .2; });
 
   // ambient
   tail.rotation.z = Math.sin(tAcc * 1.2) * .2; catBody.scale.y = .65 + Math.sin(tAcc * 1.6) * .02;
-  lampLight.intensity = 1.6 + Math.sin(tAcc * 1.7) * .03;
+  const lampK = state.lampOn ? 1 : 0;
+  lampLight.intensity += ((1.6 + Math.sin(tAcc * 1.7) * .03) * lampK - lampLight.intensity) * Math.min(1, dt * 12);
+  shade.material.emissiveIntensity += ((state.lampOn ? .9 : .04) - shade.material.emissiveIntensity) * Math.min(1, dt * 12);
+  shade.material.color.lerp(state.lampOn ? SHADE_ON : SHADE_OFF, Math.min(1, dt * 12));
+  hemi.intensity += ((state.lampOn ? .55 : .3) - hemi.intensity) * Math.min(1, dt * 8);
+  fill.intensity += ((state.lampOn ? .35 : .18) - fill.intensity) * Math.min(1, dt * 8);
   bulbs.forEach((b, i) => b.scale.setScalar(.85 + Math.sin(tAcc * 2 + i) * .15));
 
   // camera (gentle push-in at climax)
   camZoom += ((k === "climax" ? 1 : 0) - camZoom) * dt * 1.5;
   const beatPulse = k === "climax" ? Math.max(0, Math.sin(((tAcc % .62) / .62) * Math.PI * 2)) * .05 : 0;
   camera.position.copy(camTarget).addScaledVector(camDir, camDist * (1 - camZoom * .1 - beatPulse * .3));
+  if (state.shakeT > 0) { state.shakeT -= dt; const a = state.shakeT * .35; camera.position.x += rand(-a, a); camera.position.y += rand(-a, a); }
   camera.lookAt(camTarget);
 
   // html overlay positions
+  const minY = hudBottom();
   for (const [el, anchor] of [[ui.mamaB, mamaAnchor], [ui.kidB, kidAnchor]]) {
-    const [x, y] = toScreen(anchor); el.style.left = x + "px"; el.style.top = y + "px";
+    const [x, y] = toScreen(anchor), half = el.offsetWidth / 2 + 8;
+    el.style.left = clamp(x, half, app.clientWidth - half) + "px";
+    el.style.top = Math.max(y, minY + el.offsetHeight + 8) + "px";
   }
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
